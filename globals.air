@@ -21,7 +21,7 @@ fn setVariables(game : &mut Game) {
     game.WIDTH = 1000.0
     game.HEIGHT = 800.0
 
-    //-- Mouse click interactions
+    // Mouse click interactions
     game.dragging = false
     game.draggingType = "force" // `force` or `angle`
     game.mouseXinitial = 0.0
