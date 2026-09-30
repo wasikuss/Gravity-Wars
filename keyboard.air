@@ -8,23 +8,32 @@ import logic.{newGame}
 fn love_keypressed(game: &mut Game, key: String) {
     print(key)
 
+    let player = if game.turn == 1 {
+        &mut game.player1
+    } else {
+        &mut game.player2
+    }
+
     if key == "right" {
         game.keyRight = true
+        player.angle = player.angle + 1.0
     }
 
     if key == "left" {
         game.keyLeft = true
+        player.angle = player.angle - 1.0
     }
 
     if key == "up" {
         game.keyUp = true
 
-        game.player1.force = game.player1.force * 1.01
-
+        player.force = player.force * 1.01
     }
 
     if key == "down" {
         game.keyDown = true
+
+        player.force = player.force * 0.99
     }
 
     if key == "x" {
