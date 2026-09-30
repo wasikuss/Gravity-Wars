@@ -1,131 +1,119 @@
-----------------------------------------------------------------------------------------------------
--- Code related to touch interactions (from Codea, not yet updated for Love2D)
-----------------------------------------------------------------------------------------------------
--- toggle booleans if clicked in areas where button / sliders are
-function love.mousepressed(x, y, button)
+// ----------------------------------------------------------------------------------------------------
+// -- Code related to touch interactions (from Codea, not yet updated for Love2D)
+// ----------------------------------------------------------------------------------------------------
+// -- toggle booleans if clicked in areas where button / sliders are
+import types.{Player, Game}
+import ui.{drawUI}
+import shoot.{playerPressedShootButton}
 
-    -- print(x)
-    -- print(y)
+fn love_mousepressed(game: &mut Game, x: Float, y: Float, button: Int) {
+    let love = getLove()
+    
+    // print(x)
+    // print(y)
 
-    --[[ fun times
-    if shotInProgress == true then
-        explode(x,y)
-    end
-    ]] --
+    // fun times
+    // if shotInProgress == true {
+    //     explode(x,y)
+    // }
 
-    -- rectangle on bottom-right to detect pressing shoot button
-    if shotInProgress == false and (x > (WIDTH - 100) and y > HEIGHT - 100) then
-        playerPressedShootButton()
-    end
+    // rectangle on bottom-right to detect pressing shoot button
+    if game.shotInProgress == false && (x > (game.WIDTH - 100.0) && y > game.HEIGHT - 100.0) {
+        playerPressedShootButton(game)
+    }
 
-    if shotInProgress == false then
-        clickNearShip = nearShip(x, y, currentPlayer())
+    if game.shotInProgress == false {
+        let clickNearShip = if game.turn == 1 {
+            nearShip(x, y, &game.player1)
+        } else {
+            nearShip(x, y, &game.player2)
+        }
 
-        if clickNearShip == 'force' then
-            mouseXinitial = x
-            draggingType = 'force'
-            dragging = true
-            love.mouse.setCursor(dragCursor)
-        elseif clickNearShip == 'angle' then
-            mouseXinitial = x
-            draggingType = 'angle'
-            dragging = true
-            love.mouse.setCursor(dragCursor)
-        end
+        if clickNearShip == "force" {
+            game.mouseXinitial = x
+            game.draggingType = "force"
+            game.dragging = true
+            love.mouse.setCursor(game.dragCursor)
+        } else if clickNearShip == "angle" {
+            game.mouseXinitial = x
+            game.draggingType = "angle"
+            game.dragging = true
+            love.mouse.setCursor(game.dragCursor)
+        }
+    }
+}
 
-    end
+// returns "force", "angle", 'no'
+fn nearShip(x: Float, y: Float, playerN: &Player) -> String {
+    let forceOffset = 100.0 * playerN.force / 5.0
 
-end
+    let distance = pow(pow((playerN.x - x), 2.0) + pow((playerN.y - y), 2.0), 0.5)
 
--- returns 'force', 'angle', 'no'
-function nearShip(x, y, playerN)
-
-    forceOffset = 100 * playerN.force / 5
-
-    distance = math.pow(math.pow((playerN.x - x), 2) + math.pow((playerN.y - y), 2), 0.5)
-
-    if distance < clamp(forceOffset, 10, 90) then
-        return 'force'
-    elseif distance < 100 then
-        return 'angle'
-    else
-        return 'no'
-    end
-
-end
+    if distance < clamp(forceOffset, 10.0, 90.0) {
+        return "force"
+    } else if distance < 100.0 {
+        return "angle"
+    } else {
+        return "no"
+    }
+}
 
 
--- short circuit the love.update function with boolean
-function love.mousereleased(x, y, button)
-    dragging = false
-    love.mouse.setCursor()
-end
+// short circuit the love.update fn with boolean
+fn love_mousereleased(game: &mut Game, x: Float, y: Float, button: Int) {
+    let love = getLove()
+    game.dragging = false
+    love.mouse.resetCursor()
+}
 
--- if the mouse is being dragged after clicking, update the values of force or angle
--- uses distance from initial click for smoothly
-function love.update(dt)
-    if dragging then
+// if the mouse is being dragged after clicking, update the values of force or angle
+// uses distance from initial click for smoothly
+fn love_update(game : &mut Game, dt : Float) {
+    let love = getLove()
 
-        mouseXcurrent = love.mouse.getX()
+    if game.dragging {
+        game.mouseXcurrent = love.mouse.getX()
+        if game.mouseXinitial != game.mouseXcurrent {
+            let diff = game.mouseXcurrent - game.mouseXinitial
 
-        if mouseXinitial ~= mouseXcurrent then
+            if game.draggingType == "angle" {
+                if game.turn == 1 {
+                    game.player1.angle = getAngle(&game.player1, diff)
+                } else if game.turn == 2 {
+                    game.player2.angle = getAngle(&game.player2, diff)
+                }
+            } else if game.draggingType == "force" {
+                if game.turn == 1 {
+                    game.player1.force = getForce(&game.player1, diff)
+                } else if game.turn == 2 {
+                    game.player2.force = getForce(&game.player2, diff)
+                }
+            }
 
-            diff = mouseXcurrent - mouseXinitial
+            love.graphics.setCanvas(game.canvas)
+            drawUI(game)
+            love.graphics.resetCanvas()
+        }
+    }
 
-            if draggingType == 'angle' then
+    // -- if shotInProgress == false {
+    // --     if keyUp {
+    // --         game.player1.force = game.player1.force * 1.01
+    // --     }
+    // -- }
+}
 
-                if turn == 1 then
-                    player1.angle = getAngle(player1, diff)
-                elseif turn == 2 then
-                    player2.angle = getAngle(player2, diff)
-                end
+fn getForce(playerN : &Player, diff : Float) -> Float {
+    clamp(playerN.force + clamp(pow(diff / 1000.0, 3.0), -0.02, 0.02), 0.0, 5.0)
+}
 
-            elseif draggingType == 'force' then
+fn getAngle(playerN : &Player, diff : Float) -> Float {
+    mut angle = playerN.angle + clamp(pow(diff / 200.0, 3.0), -1.0, 1.0)
+    if angle > 360.0 {
+        angle = angle - 360.0
+    } else if angle < 0.0 {
+        angle = angle + 360.0
+    }
 
-                if turn == 1 then
-                    player1.force = getForce(player1, diff)
-                elseif turn == 2 then
-                    player2.force = getForce(player2, diff)
-                end
-
-            end
-
-            love.graphics.setCanvas(canvas)
-            drawUI()
-            love.graphics.setCanvas()
-
-        end
-    end
-
-    -- if shotInProgress == false then
-    --     if keyUp then
-    --         player1.force = player1.force * 1.01
-    --     end
-    -- end
-end
-
-function getForce(playerN, diff)
-
-    return clamp(playerN.force + clamp(math.pow(diff / 1000, 3), -0.02, 0.02), 0, 5)
-
-end
-
-function getAngle(playerN, diff)
-
-    angle = playerN.angle + clamp(math.pow(diff / 200, 3), -1, 1)
-    if angle > 360 then
-        angle = angle - 360
-    elseif angle < 0 then
-        angle = angle + 360
-    end
-
-    return angle
-
-end
-
--- make the input value never go below min or above max
-function clamp(value, min, max)
-
-    return math.max(math.min(value, max), min)
-
-end
+    angle
+}

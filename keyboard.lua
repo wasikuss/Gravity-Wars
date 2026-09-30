@@ -1,52 +1,52 @@
-----------------------------------------------------------------------------------------------------
--- Code related to keyboard interactions
-----------------------------------------------------------------------------------------------------
-function love.keypressed(key)
+// ----------------------------------------------------------------------------------------------------
+// -- Code related to keyboard interactions
+// ----------------------------------------------------------------------------------------------------
+import types.{Game}
+import shoot.{explode, playerPressedShootButton}
+import logic.{newGame}
 
+fn love_keypressed(game: &mut Game, key: String) {
     print(key)
 
-    if key == 'right' then
-        keyRight = true
-    end
+    if key == "right" {
+        game.keyRight = true
+    }
 
-    if key == 'left' then
-        keyLeft = true
-    end
+    if key == "left" {
+        game.keyLeft = true
+    }
 
-    if key == 'up' then
-        keyUp = true
+    if key == "up" {
+        game.keyUp = true
 
-        player1.force = player1.force * 1.01
+        game.player1.force = game.player1.force * 1.01
 
-    end
+    }
 
-    if key == 'down' then
-        keyDown = true
-    end
+    if key == "down" {
+        game.keyDown = true
+    }
 
-    if key == 'x' then
-        explode(400, 300)
-    end
+    if key == "x" {
+        explode(game, 400.0, 300.0)
+    }
 
-    if key == 'n' then
-        newGame()
-    end
+    if key == "n" {
+        newGame(game)
+    }
 
-    if key == 'space' then
-        playerPressedShootButton()
-    end
+    if key == "space" {
+        playerPressedShootButton(game)
+    }
 
-    if key == 'escape' then
-        os.exit()
-    end
+    if key == "escape" {
+        quit()
+    }
+}
 
-end
-
-function love.keyreleased(key)
-
-    keyRight = false
-    keyLeft = false
-    keyUp = false
-    keyDown = false
-
-end
+fn love_keyreleased(game: &mut Game, key: String) {
+    game.keyRight = false
+    game.keyLeft = false
+    game.keyUp = false
+    game.keyDown = false
+}

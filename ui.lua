@@ -1,169 +1,178 @@
-----------------------------------------------------------------------------------------------------
--- Code related to drawing the UI (user interface)
-----------------------------------------------------------------------------------------------------
-function drawUI()
+// ----------------------------------------------------------------------------------------------------
+// -- Code related to drawing the UI (user interface)
+// ----------------------------------------------------------------------------------------------------
+import types.{Player, Game}
 
-    love.graphics.setColor(1, 1, 1, 1)
+fn drawUI(game : &Game) {
+    let love = getLove()
 
-    -- rectangle for health bars and around play area
-    love.graphics.rectangle('line', 2, 2, WIDTH - 4, 30)
-    love.graphics.rectangle('line', 2, 32, WIDTH - 4, HEIGHT - 34)
+    love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
 
-    drawShootButton()
+    // rectangle for health bars and around play area
+    love.graphics.rectangle("line", 2.0, 2.0, game.WIDTH - 4.0, 30.0)
+    love.graphics.rectangle("line", 2.0, 32.0, game.WIDTH - 4.0, game.HEIGHT - 34.0)
 
-    drawLives()
+    drawShootButton(game)
 
-    drawHealthBars()
+    drawLives(game)
 
-    love.graphics.setColor(1, 1, 1, 1)
+    drawHealthBars(game)
 
-end
+    love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
+}
 
--- shoot BUTTON rectangle -- change states while shot in progress
-function drawShootButton()
+// shoot BUTTON rectangle -- change states while shot in progress
+fn drawShootButton(game : &Game) {
+    let love = getLove()
 
-    if shotInProgress == true then
-        love.graphics.setColor(0.5, 0, 0, 1)
-        love.graphics.ellipse('fill', WIDTH - 50, HEIGHT - 50, 30, 30)
-    else
-        love.graphics.setColor(16 / 255, 178 / 255, 197 / 255, 1)
-        love.graphics.ellipse('fill', WIDTH - 50, HEIGHT - 50, 30, 30)
-    end
+    if game.shotInProgress == true {
+        love.graphics.setColor(0.5, 0.0, 0.0, 1.0)
+    } else {
+        love.graphics.setColor(16.0 / 255.0, 178.0 / 255.0, 197.0 / 255.0, 1.0)
+    }
+    love.graphics.ellipse("fill", game.WIDTH - 50.0, game.HEIGHT - 50.0, 30.0, 30.0)
+}
 
-end
+// draw how many lives each has
+fn drawLives(game : &Game) {
+    let love = getLove()
 
--- draw how many lives each has
-function drawLives()
-
-    love.graphics.setColor(1, 1, 0, 1)
-    for i = 1, player1.lives do
+    love.graphics.setColor(1.0, 1.0, 0.0, 1.0)
+    for i in 0..game.player1.lives {
         love.graphics
-            .ellipse('fill', WIDTH / 2 + 35 + 20 * i, 16, 8, 8)
-    end
+            .ellipse("fill", game.WIDTH / 2.0 + 35.0 + 20.0 * float(i), 16.0, 8.0, 8.0)
+    }
 
-    for i = 1, player2.lives do
+    for i in 0..game.player2.lives {
         love.graphics
-            .ellipse('fill', WIDTH / 2 - 35 - 20 * i, 16, 8, 8)
-    end
+            .ellipse("fill", game.WIDTH / 2.0 - 35.0 - 20.0 * float(i), 16.0, 8.0, 8.0)
+    }
+}
 
-end
+// draw health bars - responsive depending on WIDTH
+fn drawHealthBars(game : &Game) {
+    let love = getLove()
 
--- draw health bars - responsive depending on WIDTH
-function drawHealthBars()
+    let topOffset = 10.0
 
-    topOffset = 10
+    let barWidth = game.WIDTH / 2.0 - 200.0
 
-    barWidth = WIDTH / 2 - 200
+    let health1 = float(game.player1.health)
+    let health2 = float(game.player2.health)
 
-    -- right health bar
-    love.graphics.setColor((255 - player1.health * 2.55) / 255, 1, 0, 1)
-    love.graphics.rectangle('fill', WIDTH / 2 + 150, topOffset, barWidth, 10)
+    // right health bar
+    love.graphics.setColor((255.0 - health1 * 2.55) / 255.0, 1.0, 0.0, 1.0)
+    love.graphics.rectangle("fill", game.WIDTH / 2.0 + 150.0, topOffset, barWidth, 10.0)
 
-    if player1.health < 100 then
-        love.graphics.setColor(223 / 255, (45 + player1.health) / 255,
-                               (45 + player1.health) / 255, 1)
-        love.graphics.rectangle('fill', (WIDTH / 2 + 150) + barWidth - barWidth *
-                                    ((100 - player1.health) / 100), topOffset,
-                                barWidth - barWidth * ((player1.health) / 100), 10)
-    end
+    if game.player1.health < 100 {
+        love.graphics.setColor(223.0 / 255.0, (45.0 + health1) / 255.0,
+                               (45.0 + health1) / 255.0, 1.0)
+        love.graphics.rectangle("fill", (game.WIDTH / 2.0 + 150.0) + barWidth - barWidth *
+                                    ((100.0 - health1) / 100.0), topOffset,
+                                barWidth - barWidth * (health1 / 100.0), 10.0)
+    }
 
-    -- left health bar
-    love.graphics.setColor((255 - player2.health * 2.55) / 255, 1, 0, 1)
-    love.graphics.rectangle('fill', WIDTH / 2 - barWidth - 150, topOffset, barWidth, 10)
+    // left health bar
+    love.graphics.setColor((255.0 - health2 * 2.55) / 255.0, 1.0, 0.0, 1.0)
+    love.graphics.rectangle("fill", game.WIDTH / 2.0 - barWidth - 150.0, topOffset, barWidth, 10.0)
 
-    if player2.health < 100 then
-        love.graphics.setColor(224 / 255, (45 + player2.health) / 255,
-                               (45 + player2.health) / 255, 1)
-        love.graphics.rectangle('fill', (WIDTH / 2 - barWidth - 150), topOffset,
-                                barWidth - barWidth * ((player2.health) / 100), 10)
-    end
+    if game.player2.health < 100 {
+        love.graphics.setColor(224.0 / 255.0, (45.0 + health2) / 255.0,
+                               (45.0 + health2) / 255.0, 1.0)
+        love.graphics.rectangle("fill", (game.WIDTH / 2.0 - barWidth - 150.0), topOffset,
+                                barWidth - barWidth * (health2 / 100.0), 10.0)
+    }
+}
 
-end
+fn drawForceAndAngle(game : &Game, which : Int, tempHack : Int) {
+    let love = getLove()
 
-function drawForceAndAngle(playerN, tempHack)
+    let px = if which == 1 { game.player1.x } else { game.player2.x }
+    let py = if which == 1 { game.player1.y } else { game.player2.y }
+    let force = if which == 1 { game.player1.force } else { game.player2.force }
+    let angle = if which == 1 { game.player1.angle } else { game.player2.angle }
+    mut xOffset = 0.0
+    mut angleY = 0.0
+    mut forceY = 0.0
 
-    -- different offset depending on player
-    if tempHack == 1 then
-        xOffset = playerN.x - 140
-        angleY = playerN.y + 80
-        forceY = playerN.y + 92
-    else
-        xOffset = playerN.x + 55
-        angleY = playerN.y + 78
-        forceY = playerN.y + 90
-    end
+    // different offset dep}ing on player
+    if tempHack == 1 {
+        xOffset = px - 140.0
+        angleY = py + 80.0
+        forceY = py + 92.0
+    } else {
+        xOffset = px + 55.0
+        angleY = py + 78.0
+        forceY = py + 90.0
+    }
 
-    -- black background behind angle and force
-    love.graphics.setColor(0, 0, 0, 0.7)
-    love.graphics.rectangle('fill', xOffset + 12, angleY, 70, 13, 4, 4)
-    love.graphics.rectangle('fill', xOffset + 24, forceY + 1, 66, 12, 4, 4)
+    // black background behind angle and force
+    love.graphics.setColor(0.0, 0.0, 0.0, 0.7)
+    love.graphics.rectangle_rounded("fill", xOffset + 12.0, angleY, 70.0, 13.0, 4.0, 4.0)
+    love.graphics.rectangle_rounded("fill", xOffset + 24.0, forceY + 1.0, 66.0, 12.0, 4.0, 4.0)
 
-    -- print force (red)
-    love.graphics.setColor(1, 0, 0, 1)
-    love.graphics.setFont(pixelFont, 20)
-    love.graphics.print('GJ', xOffset + 76, forceY) -- GigaJoules
-    love.graphics.printf(string.format("%.5f", playerN.force), xOffset, forceY, 75, 'right')
+    // print force (red)
+    love.graphics.setColor(1.0, 0.0, 0.0, 1.0)
+    love.graphics.setFont(game.assets.pixelFont) // size 20
+    love.graphics.draw_text("GJ", xOffset + 76.0, forceY) // GigaJoules
+    love.graphics.draw_text_aligned("{fmt_float(force, 5)}", xOffset, forceY, 75.0, "right")
 
-    -- print angle (white)
-    love.graphics.setColor(1, 1, 1, 1)
-    love.graphics.printf(string.format("%.5f", 360 - playerN.angle), xOffset, angleY, 75, 'right')
-    love.graphics.ellipse('line', xOffset + 78, angleY + 3, 2, 2)
+    // print angle (white)
+    love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
+    love.graphics.draw_text_aligned("{fmt_float(360.0 - angle, 5)}", xOffset, angleY, 75.0, "right")
+    love.graphics.ellipse("line", xOffset + 78.0, angleY + 3.0, 2.0, 2.0)
+}
 
-end
+fn drawShips(game : &Game) {
+    let love = getLove()
 
+    // in the user interface (top left and top right)
+    love.graphics.draw(game.assets.ss1, 24.0, 11.0)
+    love.graphics.draw(game.assets.ss2, game.WIDTH - 32.0, 11.0)
 
-function drawShips()
+    // love.graphics.setColor(1.0, 0.6, 0.6, 1.0)
+    // love.graphics.ellipse("fill", player1.x, player1.y, 8.0, 8.0)
+    // love.graphics.ellipse("fill", player2.x, player2.y, 8.0, 8.0)
 
-    -- in the user interface (top left and top right)
-    love.graphics.draw(ss1, 24, 11)
-    love.graphics.draw(ss2, WIDTH - 32, 11)
+    if game.player1.health > 0 {
+        love.graphics.draw(game.assets.ss1, game.player1.x - 4.0, game.player1.y - 4.0)
+    }
 
-    -- love.graphics.setColor(1, 0.6, 0.6, 1)
-    -- love.graphics.ellipse('fill', player1.x, player1.y, 8, 8)
-    -- love.graphics.ellipse('fill', player2.x, player2.y, 8, 8)
+    if game.player2.health > 0 {
+        love.graphics.draw(game.assets.ss2, game.player2.x - 4.0, game.player2.y - 4.0)
+    }
 
-    if player1.health > 0 then
-        love.graphics.draw(ss1, player1.x - 4, player1.y - 4)
-    end
-    
-    if player2.health > 0 then
-        love.graphics.draw(ss2, player2.x - 4, player2.y - 4)
-    end
+    // love.graphics.draw(ss1, game.player1.x, game.player1.y, game.player1.angle, 1.0, 1.0, 4.0, 4.0)
+}
 
-    -- love.graphics.draw(ss1, player1.x, player1.y, player1.angle, 1, 1, 4, 4)
-
-end
-
---[[
-    Dim all the shot trails on the screen
-    meant to run after every shot
-    works by drawing a black rectangle with low opacity over the whole screen
-    then redraws all other elements on top
---]]
-function dimTrails()
+// Dim all the shot trails on the screen
+// meant to run after every shot
+// works by drawing a black rectangle with low opacity over the whole screen
+// then redraws all other elements on top
+fn dimTrails(game : &Game) {
+    let love = getLove()
 
     print("dimTrails EXECUTED")
 
-    love.graphics.setCanvas(canvas)
-    love.graphics.setColor(0, 0, 0, 0.15) -- don't fortget to reset ?
-    love.graphics.rectangle('fill', 0, 0, WIDTH, HEIGHT)
-    love.graphics.setColor(1, 1, 1, 1) -- reset back !?
-    drawPlanets() -- execute inside `canvas` ?!
-    drawShips()
-    drawUI()
-    love.graphics.setCanvas() -- reset canvas ?!
+    love.graphics.setCanvas(game.canvas)
+    love.graphics.setColor(0.0, 0.0, 0.0, 0.15) // don't fortget to reset ?
+    love.graphics.rectangle("fill", 0.0, 0.0, game.WIDTH, game.HEIGHT)
+    love.graphics.setColor(1.0, 1.0, 1.0, 1.0) // reset back !?
+    drawPlanets(game) // execute inside `canvas` ?!
+    drawShips(game)
+    drawUI(game)
+    love.graphics.resetCanvas() // reset canvas ?!
+}
 
-end
+fn drawPlanets(game : &Game) {
+    let love = getLove()
 
-function drawPlanets()
-
-    for i = 1, numOfPlanets do
-        love.graphics.setColor(0.1, 0.1, 0.1, 1)
-        love.graphics.ellipse('fill', allPlanets[i].x, allPlanets[i].y,
-                              allPlanets[i].r, allPlanets[i].r)
-        love.graphics.setColor(1, 1, 1, 1)
-        love.graphics.ellipse('line', allPlanets[i].x, allPlanets[i].y,
-                              allPlanets[i].r, allPlanets[i].r)
-    end
-
-end
+    for planet in &game.allPlanets {
+        love.graphics.setColor(0.1, 0.1, 0.1, 1.0)
+        love.graphics.ellipse("fill", planet.x, planet.y,
+                              planet.r, planet.r)
+        love.graphics.setColor(1.0, 1.0, 1.0, 1.0)
+        love.graphics.ellipse("line", planet.x, planet.y,
+                              planet.r, planet.r)
+    }
+}
